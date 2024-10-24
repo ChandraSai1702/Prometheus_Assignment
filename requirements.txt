@@ -1,0 +1,5 @@
+Flask==2.2.3  # Ensure you are using a compatible version
+Werkzeug==2.2.3  # Make sure Werkzeug is compatible with the Flask version
+prometheus_client==0.14.1
+psutil==5.9.0
+gunicorn

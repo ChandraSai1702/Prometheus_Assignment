@@ -1,0 +1,33 @@
+services:
+  flask-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5005:5000"  # Ensure you're mapping the correct ports
+    depends_on:
+      - prometheus
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9099:9090"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+
+
+volumes:
+  grafana-storage:
