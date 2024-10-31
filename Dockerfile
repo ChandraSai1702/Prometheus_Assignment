@@ -1,23 +1,29 @@
-FROM python:3.9-slim
+# USE OFFICIAL PYTHON IMAGE
+FROM python:3.10
 
-# Set environment variables
-ENV FLASK_ENV=production
-ENV PYTHONUNBUFFERED=1  
-# Ensures that Python output is sent straight to terminal without buffering
-
+# set the working directory inside the container
 WORKDIR /app
 
-# Copy the requirements file first for better caching of layers
+# copy the requirements file to install dependencies
 COPY requirements.txt /app/
 
-# Install dependencies
+# Install the dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the application code
-COPY . /app
 
-# Expose the port the app runs on
-EXPOSE 5000
+# copy the entire django project into the container
+COPY . /app/
 
-# Use Gunicorn as the WSGI server to serve the Flask app
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+# run django collectstatic
+RUN python manage.py collectstatic --noinput
+
+# Ensure the migration runs when the container starts
+RUN chmod +x /app/entrypoint.sh
+
+# Set the default entrypoint to automatically run migrations and start the server
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+EXPOSE 8000
+
+# set the default command to run django's development server
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
